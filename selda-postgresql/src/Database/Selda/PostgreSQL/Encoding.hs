@@ -55,6 +55,9 @@ fromSqlValue (LBool b)     = Just (boolType, bytes $ Enc.bool b, Binary)
 fromSqlValue (LInt n)      = Just ( intType
                                   , bytes $ Enc.int8_int64 $ fromIntegral n
                                   , Binary)
+fromSqlValue (LBigInt n)   = Just ( intType
+                                  , bytes $ Enc.int8_int64 n
+                                  , Binary)
 fromSqlValue (LDouble f)   = Just (doubleType, bytes $ Enc.float8 f, Binary)
 fromSqlValue (LText s)     = Just (textType, bytes $ Enc.text_strict s, Binary)
 fromSqlValue (LDateTime t) = Just ( timestampType
@@ -75,6 +78,7 @@ fromSqlValue (LCustom _ l) = fromSqlValue l
 fromSqlType :: SqlTypeRep -> Oid
 fromSqlType TBool     = boolType
 fromSqlType TInt      = intType
+fromSqlType TBigInt   = intType
 fromSqlType TFloat    = doubleType
 fromSqlType TText     = textType
 fromSqlType TDateTime = timestampType

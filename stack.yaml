@@ -37,7 +37,7 @@ resolver: lts-14.4
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - selda
-#- selda-postgresql
+- selda-postgresql
 - selda-sqlite
 - selda-tests
 
