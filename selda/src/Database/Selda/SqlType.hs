@@ -278,6 +278,7 @@ instance SqlType Int where
   mkLit = LInt
   sqlType _ = TInt
   fromSql (SqlInt x) = x
+  fromSql (SqlBigInt x) = fromIntegral x
   fromSql v          = error $ "fromSql: int column with non-int value: " ++ show v
   defaultValue = LInt 0
 
