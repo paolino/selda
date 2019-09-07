@@ -200,6 +200,7 @@ getRows s acc = do
 
 toSqlData :: Lit a -> SQLData
 toSqlData (LInt i)      = SQLInteger $ fromIntegral i
+toSqlData (LBigInt i)   = SQLInteger  i
 toSqlData (LDouble d)   = SQLFloat d
 toSqlData (LText s)     = SQLText s
 toSqlData (LDateTime t) = SQLText $ pack $ fmtTime sqlDateTimeFormat t

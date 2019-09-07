@@ -16,6 +16,7 @@ import Data.Maybe (fromJust)
 import Data.Proxy
 import Data.Text (Text, pack, unpack)
 import Data.Time
+import Data.Int
 import Data.Typeable
 import Data.UUID.Types (UUID, toString, fromByteString, nil)
 import GHC.Generics (Generic)
@@ -105,12 +106,14 @@ data Lit a where
   LBlob     :: !ByteString -> Lit ByteString
   LNull     :: SqlType a => Lit (Maybe a)
   LCustom   :: SqlTypeRep  -> Lit a -> Lit b
+  LBigInt   :: !Int64     -> Lit Int64
   LUUID     :: !UUID       -> Lit UUID
 
 -- | The SQL type representation for the given literal.
 litType :: Lit a -> SqlTypeRep
 litType (LText{})     = TText
 litType (LInt{})      = TInt
+litType (LBigInt{})   = TBigInt
 litType (LDouble{})   = TFloat
 litType (LBool{})     = TBool
 litType (LDateTime{}) = TDateTime
@@ -145,6 +148,7 @@ litConTag (LBlob{})     = 8
 litConTag (LNull)       = 9
 litConTag (LCustom{})   = 10
 litConTag (LUUID{})     = 11
+litConTag (LBigInt{})   = 12
 
 -- | Compare two literals of different type for equality.
 compLit :: Lit a -> Lit b -> Ordering
@@ -159,11 +163,13 @@ compLit (LBlob x)     (LBlob x')     = x `compare` x'
 compLit (LJust x)     (LJust x')     = x `compLit` x'
 compLit (LCustom _ x) (LCustom _ x') = x `compLit` x'
 compLit (LUUID x)     (LUUID x')     = x `compare` x'
+compLit (LBigInt x)   (LBigInt x')     = x `compare` x'
 compLit a             b              = litConTag a `compare` litConTag b
 
 -- | Some value that is representable in SQL.
 data SqlValue where
   SqlInt     :: !Int        -> SqlValue
+  SqlBigInt  :: Int64        -> SqlValue
   SqlFloat   :: !Double     -> SqlValue
   SqlString  :: !Text       -> SqlValue
   SqlBool    :: !Bool       -> SqlValue
@@ -175,6 +181,7 @@ data SqlValue where
 
 instance Show SqlValue where
   show (SqlInt n)     = "SqlInt " ++ show n
+  show (SqlBigInt n)  = "SqlBigInt " ++ show n
   show (SqlFloat f)   = "SqlFloat " ++ show f
   show (SqlString s)  = "SqlString " ++ show s
   show (SqlBool b)    = "SqlBool " ++ show b
@@ -187,6 +194,7 @@ instance Show SqlValue where
 instance Show (Lit a) where
   show (LText s)     = show s
   show (LInt i)      = show i
+  show (LBigInt i)   = show i
   show (LDouble d)   = show d
   show (LBool b)     = show b
   show (LDateTime s) = show s
@@ -272,6 +280,13 @@ instance SqlType Int where
   fromSql (SqlInt x) = x
   fromSql v          = error $ "fromSql: int column with non-int value: " ++ show v
   defaultValue = LInt 0
+
+instance SqlType Int64 where
+  mkLit = LBigInt
+  sqlType _ = TBigInt
+  fromSql (SqlBigInt x) = x
+  fromSql v          = error $ "fromSql: bigint column with non-bigint value: " ++ show v
+  defaultValue = LBigInt 0
 
 instance SqlType Double where
   mkLit = LDouble
