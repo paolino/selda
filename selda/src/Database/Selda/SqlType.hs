@@ -51,6 +51,7 @@ data SqlTypeRep
   | TBlob
   | TUUID
   | TJSON
+  | TBigInt
     deriving (Show, Eq, Ord)
 
 -- | Any datatype representable in (Selda's subset of) SQL.
