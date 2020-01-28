@@ -206,6 +206,7 @@ getRows s acc = do
 
 toSqlData :: Lit a -> SQLData
 toSqlData (LInt i)      = SQLInteger $ fromIntegral i
+toSqlData (LBigInt i)   = SQLInteger i
 toSqlData (LDouble d)   = SQLFloat d
 toSqlData (LText s)     = SQLText s
 toSqlData (LDateTime t) = SQLText $ pack $ fmtTime sqlDateTimeFormat t
@@ -219,7 +220,7 @@ toSqlData (LCustom _ l) = toSqlData l
 toSqlData (LUUID x)     = SQLBlob (toStrict $ toByteString x)
 
 fromSqlData :: SQLData -> SqlValue
-fromSqlData (SQLInteger i) = SqlInt $ fromIntegral i
+fromSqlData (SQLInteger i) = SqlBigInt i
 fromSqlData (SQLFloat f)   = SqlFloat f
 fromSqlData (SQLText s)    = SqlString s
 fromSqlData (SQLBlob b)    = SqlBlob b
